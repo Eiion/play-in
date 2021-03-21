@@ -52,33 +52,53 @@ browserAction.on('clicked', async tab => {
 
 runtime.on('start-up', () => {
   const {name} = webext.runtime.getManifest();
-  // copy to clipboard
+  // Open in tab
   contextMenus.create({
-    title: 'Copy detected links to the clipboard',
+    title: 'Open in tab',
     contexts: ['browser_action'],
-    id: 'copy-to-clipboard',
+    id: 'open-in-tab',
     documentUrlPatterns: ['*://*/*']
   });
+  // copy to clipboard
+  //contextMenus.create({
+  //  title: 'Copy detected links to the clipboard',
+  //  contexts: ['browser_action'],
+  //  id: 'copy-to-clipboard',
+  //  documentUrlPatterns: ['*://*/*']
+  //});
   // play links
-  contextMenus.create({
-    title: name,
-    contexts: ['video', 'audio'],
-    id: 'play-in',
-    documentUrlPatterns: ['*://*/*'],
-    targetUrlPatterns: [localStorage.getItem('targetUrlPatterns') || '*://*/*']
-  });
+  //contextMenus.create({
+  //  title: name,
+  //  contexts: ['video', 'audio'],
+  //  id: 'play-in',
+  //  documentUrlPatterns: ['*://*/*'],
+  //  targetUrlPatterns: [localStorage.getItem('targetUrlPatterns') || '*://*/*']
+  //});
 });
+
 contextMenus.on('clicked', async(info, tab) => {
   try {
     const urls = await collect(tab);
-    clipboard.write(urls.join('\n'), tab.id, urls.length + ' link(s) copied to the clipboard');
+    window.open(urls[0]);
   }
   catch (e) {
     notifications.create({
       message: e.message
     });
   }
-}).if(({menuItemId}) => menuItemId === 'copy-to-clipboard');
+}).if(({menuItemId}) => menuItemId === 'open-in-tab');
+
+//contextMenus.on('clicked', async(info, tab) => {
+//  try {
+//    const urls = await collect(tab);
+//    clipboard.write(urls.join('\n'), tab.id, urls.length + ' link(s) copied to the clipboard');
+//  }
+//  catch (e) {
+//    notifications.create({
+//      message: e.message
+//    });
+//  }
+//}).if(({menuItemId}) => menuItemId === 'copy-to-clipboard');
 // send to from context-menu
-contextMenus.on('clicked', ({srcUrl}) => send([srcUrl]))
-  .if(({menuItemId}) => menuItemId === 'play-in');
+//contextMenus.on('clicked', ({srcUrl}) => send([srcUrl]))
+//  .if(({menuItemId}) => menuItemId === 'play-in');
